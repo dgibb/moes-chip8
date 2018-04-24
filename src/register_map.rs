@@ -1,12 +1,14 @@
 pub struct register_map {
     //[chip8 reg, x86 reg, second chance bit]
     pub map: Vec<[u8;3]>,
+    pub valid_regs:[u8;8],
 }
 
 impl register_map {
     pub fn new() -> register_map{
         register_map {
             map: vec![],
+            valid_regs: [ 0, 1, 2, 3, 4, 5, 6, 7],  //al, cl, dl, bl, ah, ch, dh, bh
         }
     }
 
@@ -23,7 +25,7 @@ impl register_map {
     pub fn map(&mut self, chip8_register: u8){
         if !self.contains_chip8_reg(chip8_register){
             let index: u8 = self.map.len() as u8;
-            self.map.push([chip8_register, index , 0])
+            self.map.push([chip8_register, self.valid_regs[index as usize] , 0])
         }
     }
 
@@ -37,7 +39,7 @@ impl register_map {
     }
 
     pub fn full(&mut self) -> bool {
-        if self.map.len() == 12 {
+        if self.map.len() == 8 {
             return true;
         }
         return false;

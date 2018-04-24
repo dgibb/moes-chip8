@@ -11,8 +11,9 @@ extern{
 pub struct executable_block {
     pub block: *mut u8,
     pub map: register_map,
-    pub fn_ptr: Option< fn() -> u64 >,
+    pub fn_ptr: Option< fn(&mut [u8;16]) -> u64 >,
     pub chip8_entry: u16,
+    pub chip8_exit: u16,
 }
 
 unsafe impl Send for executable_block {}
@@ -49,14 +50,19 @@ impl executable_block {
              map: register_map::new(),
              fn_ptr: None,
              chip8_entry: chip8_entry,
+             chip8_exit: 0x000,
           }
     }
 
-    pub fn create_fn_ptr(&mut self) -> (fn() -> u64) {
+    pub fn set_exit(&mut self, exit_point: u16){
+        self.chip8_exit = exit_point;
+    }
+
+    pub fn create_fn_ptr(&mut self) -> (fn(&mut [u8;16]) -> u64) {
          unsafe { mem::transmute(self.block) }
     }
 
-    pub fn assign_fn_ptr(&mut self) -> Option< fn() -> u64 > {
+    pub fn assign_fn_ptr(&mut self) -> Option< fn(&mut [u8;16]) -> u64 > {
          self.fn_ptr = Some(self.create_fn_ptr());
          return self.fn_ptr;
     }

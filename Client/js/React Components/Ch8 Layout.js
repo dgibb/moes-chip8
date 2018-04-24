@@ -1,7 +1,8 @@
 import React from 'react';
-import jquery from 'jquery'
+import jquery from 'jquery';
 import { Header } from './Header';
 import { CpuState } from './CpuState';
+import { EmulatorBlocks } from './EmulatorBlocks';
 import { Footer } from './Footer';
 
 export class Layout extends React.Component {
@@ -9,8 +10,8 @@ export class Layout extends React.Component {
     super();
     this.state = {
       romLoaded: false,
-      mode: 'User',
-      thumb: 'ARM',
+      rom: [],
+      blocks: [],
       registers: [
         0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
@@ -24,14 +25,7 @@ export class Layout extends React.Component {
   }
 
   executeInstruction() {
-    jquery.get('/runBlock', () => {
-      // const cpuState = JSON.parse(data)
-      // this.setState({
-      //  registers: cpuState.R,
-      //  thumb: cpuState.Thumb,
-      //  mode: cpuState.Mode
-      // })
-    });
+    this.props.socket.emit('run-block');
   }
 
   resetServer() {
@@ -52,15 +46,17 @@ export class Layout extends React.Component {
       const byteArray = new Uint8Array(reader.result);
       console.log(byteArray);
       xhr.send(byteArray);
+      this.setState({
+        romLoaded: true,
+        buttonFunc: this.executeInstruction.bind(this),
+        buttonText: 'Run Block',
+        rom: byteArray,
+      });
+      console.log(xhr.responseText);
     };
     const xhr = new XMLHttpRequest;
     xhr.open('POST', '/sendRom', false);
     reader.readAsArrayBuffer(file);
-    this.setState({
-      romLoaded: true,
-      buttonFunc: this.executeInstruction.bind(this),
-      buttonText: 'Run Block',
-    });
   }
 
 
@@ -82,8 +78,6 @@ export class Layout extends React.Component {
 
             <CpuState
               registers={this.state.registers}
-              mode={this.state.mode}
-              thumb={this.state.thumb}
               romLoaded={this.state.romLoaded}
             />
             <div className="outer-container white row">
@@ -120,11 +114,15 @@ export class Layout extends React.Component {
 
           <CpuState
             registers={this.state.registers}
-            mode={this.state.mode}
-            thumb={this.state.thumb}
             romLoaded={this.state.romLoaded}
           />
-          <div className="outer-container white row">
+
+          <EmulatorBlocks
+            blocks={this.state.blocks}
+            rom={this.state.rom}
+          />
+
+          <div className="outer-container grey row">
             <div className="inner-container col-lg-8 col-md-10 col-sm-12 col-xs-12">
               <h2 className="large-margin">Cpu Controls</h2>
               <div className="button-container col-lg-6 col-md-6 col-sm-6 col-xs-6">

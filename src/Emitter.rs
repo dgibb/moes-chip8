@@ -16,7 +16,6 @@ impl Emitter {
     pub fn emit(&mut self, dyna_rec_code: &Vec<u8>, executable_block: &mut executable_block){
         for (index,i) in dyna_rec_code.iter().enumerate() {
             executable_block[index] = *i;
-            println!("Emitting! {:X} to index {}", *i, index);
         }
     }
 }

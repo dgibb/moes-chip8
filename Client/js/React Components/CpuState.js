@@ -29,7 +29,7 @@ export class CpuState extends React.Component {
       (register, i) => (
         <Register
           key={i}
-          leftText={ 'r' + i.toString()}
+          leftText={'r' + i.toString()}
           rightText={(register === 'N/A') ? 'N/A' : '0x' + toHex(register)}
         />
       ));
